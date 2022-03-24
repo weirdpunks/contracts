@@ -1,0 +1,675 @@
+{
+	"compiler": {
+		"version": "0.8.7+commit.e28d00a7"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "_oracleAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_tokensPerSecond",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_genesisTimestamp",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "constructor"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "previousOwner",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "newOwner",
+						"type": "address"
+					}
+				],
+				"name": "OwnershipTransferred",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "bytes32",
+						"name": "role",
+						"type": "bytes32"
+					},
+					{
+						"indexed": true,
+						"internalType": "bytes32",
+						"name": "previousAdminRole",
+						"type": "bytes32"
+					},
+					{
+						"indexed": true,
+						"internalType": "bytes32",
+						"name": "newAdminRole",
+						"type": "bytes32"
+					}
+				],
+				"name": "RoleAdminChanged",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "bytes32",
+						"name": "role",
+						"type": "bytes32"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "sender",
+						"type": "address"
+					}
+				],
+				"name": "RoleGranted",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "bytes32",
+						"name": "role",
+						"type": "bytes32"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "sender",
+						"type": "address"
+					}
+				],
+				"name": "RoleRevoked",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "user",
+						"type": "address"
+					}
+				],
+				"name": "checkEthTokens",
+				"type": "event"
+			},
+			{
+				"inputs": [],
+				"name": "DEFAULT_ADMIN_ROLE",
+				"outputs": [
+					{
+						"internalType": "bytes32",
+						"name": "",
+						"type": "bytes32"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "ORACLE",
+				"outputs": [
+					{
+						"internalType": "bytes32",
+						"name": "",
+						"type": "bytes32"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "WeirdPunksContract",
+				"outputs": [
+					{
+						"internalType": "contract WeirdPunks",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "WeirdToken",
+				"outputs": [
+					{
+						"internalType": "contract ERC20",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "claim",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256[]",
+						"name": "ownedIDs",
+						"type": "uint256[]"
+					}
+				],
+				"name": "claimableForIDs",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "genesisTimestamp",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "role",
+						"type": "bytes32"
+					}
+				],
+				"name": "getRoleAdmin",
+				"outputs": [
+					{
+						"internalType": "bytes32",
+						"name": "",
+						"type": "bytes32"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "role",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					}
+				],
+				"name": "grantRole",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "role",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					}
+				],
+				"name": "hasRole",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "id",
+						"type": "uint256"
+					}
+				],
+				"name": "lastClaim",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"name": "lastClaimed",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "user",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "tokenIDs",
+						"type": "uint256[]"
+					}
+				],
+				"name": "oracleClaimEthTokens",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "owner",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "renounceOwnership",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "role",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					}
+				],
+				"name": "renounceRole",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "role",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					}
+				],
+				"name": "revokeRole",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_tokensPerSecond",
+						"type": "uint256"
+					}
+				],
+				"name": "setTokensPerSecond",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes4",
+						"name": "interfaceId",
+						"type": "bytes4"
+					}
+				],
+				"name": "supportsInterface",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "tokensPerSecond",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "newOwner",
+						"type": "address"
+					}
+				],
+				"name": "transferOwnership",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "withdrawTokens",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {
+				"getRoleAdmin(bytes32)": {
+					"details": "Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}."
+				},
+				"grantRole(bytes32,address)": {
+					"details": "Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``'s admin role."
+				},
+				"hasRole(bytes32,address)": {
+					"details": "Returns `true` if `account` has been granted `role`."
+				},
+				"owner()": {
+					"details": "Returns the address of the current owner."
+				},
+				"renounceOwnership()": {
+					"details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner."
+				},
+				"renounceRole(bytes32,address)": {
+					"details": "Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been revoked `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `account`."
+				},
+				"revokeRole(bytes32,address)": {
+					"details": "Revokes `role` from `account`. If `account` had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must have ``role``'s admin role."
+				},
+				"supportsInterface(bytes4)": {
+					"details": "See {IERC165-supportsInterface}."
+				},
+				"transferOwnership(address)": {
+					"details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+				}
+			},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"Weird Claiming.sol": "WeirdClaiming"
+		},
+		"evmVersion": "london",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"AccessControl.sol": {
+			"keccak256": "0x77ef757effb50555d9a7653e6629ca9892b9dd171523a285942c08b216674471",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://3d815b25c3597a7d3d9651876b76df4e3a84f79cf265a5cf49671112db6a5d84",
+				"dweb:/ipfs/QmaDmPTPrx7CFXpNUx4DxCpV5KmvUnodDN571nEt9RjzgS"
+			]
+		},
+		"Address.sol": {
+			"keccak256": "0x4f82ac554df2b88092b0dff60e01918ddb7b4d34935150ad5a82c03ce83ed225",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://9d452f560e273b2c7c5b83bb29826ee164deb9aac4a0489452368f303227edd7",
+				"dweb:/ipfs/QmTj2yeCDKwy4pa4oNZ1b5NeQf9X6X4cn5k4pL9EqTpJs5"
+			]
+		},
+		"Context.sol": {
+			"keccak256": "0x2c36c9489879b7c91cdd73bbe8b2584f401aa26f4f252c04f053e824d6ca75c6",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://3ef20575fc12fd27f252acd28a8d0f65893832f29fd9c82f7ec165121af4572f",
+				"dweb:/ipfs/QmZMCoWWDTjhs1CNFMWv4JNWVyyeuzyqteCHhF4heCUYJJ"
+			]
+		},
+		"ERC165.sol": {
+			"keccak256": "0x847fd3fb0bb6946e86e0da7060f08df5961ec874b4f93de2438b835b92edfd08",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://4b85ed4a7ffd8067845fc390c896e4f49f78d4de1be291b76eda465f941e4e0c",
+				"dweb:/ipfs/QmbvCXfbTtEq4C1hpVjHGWCUVC5KdZHTCADWDwLYrYJZ88"
+			]
+		},
+		"ERC20.sol": {
+			"keccak256": "0xff68e46eca3f02668fccd4beb415aa3273deaf0fb05543f68789ce2497fa469a",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://fae049203e265d8b3258c6d4183768af6eca79513765ed8ef7dc706a797ed8ca",
+				"dweb:/ipfs/Qme3iNgNn2XCRc5h7rQjrEywFeVLomBoJuRVpJUzxUGMvi"
+			]
+		},
+		"ERC721.sol": {
+			"keccak256": "0x19fc818d8e272ec250e59d33fb2a2c4b26c48ee4020ca107172247daee50fcf3",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://7a1a9b03b6d58920b06f64a12d37482d9bb28e11cd0a08a2371f6a8598d0ba88",
+				"dweb:/ipfs/QmTB3LYJSUtLQDmCsRJiMRzHgw7QmgmzHpEFFsohyu71Ts"
+			]
+		},
+		"IAccessControl.sol": {
+			"keccak256": "0x89c6c2a63dc6c357c6108de150ab329ad7f847f3ff00a35bcd55f769f4ebcad4",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://cadec590da43255289e7db8e08a0760869efa64c543dbd8af46690ce5295d497",
+				"dweb:/ipfs/QmZsPSyWeA3aZgDgtXMMx11wvTadrf5FzrxkWDbUfM11Ue"
+			]
+		},
+		"IERC165.sol": {
+			"keccak256": "0x3213cb47aba4f8ba951dc5671d44e3559fecec1e9c402e679fbb5ada255fdff1",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://fc2296c533793e4c2a6eb4909bd2ca8e99044aff82e3fe2049092bd3f62034a3",
+				"dweb:/ipfs/QmVwAULUUqeXLdggzzW1C3hdNUZbqHoCskoGyfzZ5EKcwW"
+			]
+		},
+		"IERC20.sol": {
+			"keccak256": "0x1d818711fa1c81c648fea370a25f6b858367fa87da30fe041f4f75999fddb5ee",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://2912b750e329c462161563201b0b0efd68d9a51c99af28aec27d8dfcedf7a3e3",
+				"dweb:/ipfs/QmUQfLAvAuFVSFt86XWJ61JQnNGwdUN2og1pHZeqqpbHaz"
+			]
+		},
+		"IERC20Metadata.sol": {
+			"keccak256": "0x1ffe2047e11fcdd75b2aca845ef3428d93765011f9bdb0ca7bf5d9f95f62656a",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://7b608f183a24077b867dcf21b1e5956b431291324b6025cbb864eb295e005307",
+				"dweb:/ipfs/QmPsgCmqe4HYkFpvYJGWWbkLoQEdhWDzmhG6Lv54FXua8W"
+			]
+		},
+		"IERC721.sol": {
+			"keccak256": "0xd7f8bef15bb019d02253458f344c8402ce7444c0425c75a34249b444d5ea0b55",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://0a842cff774e959c33885b852761a7bfb6c68db494eb36adc873bfdb8dcd1d98",
+				"dweb:/ipfs/Qme3STQDCAGpNTaCCqXdVSZUCAwiqqKd5BRaue2LgJYH2R"
+			]
+		},
+		"IERC721Metadata.sol": {
+			"keccak256": "0xbd2f66fddef3b5180deb1c8bef90ae0a356f85c25dc7ef52fc663dea2b449ff4",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://f0ba681d1360880d7fb5457223586f550029f430bea9a7b34400eb63c4c3ecae",
+				"dweb:/ipfs/QmTZGYJQJDE8nSuHFHshuc1fYSwdWJuEXVBZ9vUQKF6ao8"
+			]
+		},
+		"IERC721Receiver.sol": {
+			"keccak256": "0x328541432c99af30cb64767e4828c9cdc38c9c97271c927667c2fd29653a80db",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://8957c3de0494d183676d4516bb59a7f7a38e7d4a0e2a8038f43a98549a49ab4c",
+				"dweb:/ipfs/QmRyZLJFHkbPz3oKBQjnqdsoHtzEr1jJSTBnKYQvaFC7Sg"
+			]
+		},
+		"Math.sol": {
+			"keccak256": "0x0593a624dd555bf207bfe73da95001195e35f9753a66a7cba1a4a46919157303",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://0edffb2162ce8f5771ea06e3f8ac9df7001968d750f26b90da2ae4622eb6fa4f",
+				"dweb:/ipfs/QmcWJou6u821t8y8bLFWPQKQ57WMTp4gvBsXcdovziZvNx"
+			]
+		},
+		"Ownable.sol": {
+			"keccak256": "0x5eeb86897007c578f301464fceac720c7330486c54ae85c0c09068b46197cfb9",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://edefd9ff4f087a3016763a687eaae449c0e8f6dcda9d86032a49de900f129050",
+				"dweb:/ipfs/Qmc4adiPdGKgEJLxqgd8JuKkwrNBNtB78kkGinnnuUnyJN"
+			]
+		},
+		"SafeMath.sol": {
+			"keccak256": "0x8ca6870bea5eb6f7dae440f927ba9ec9a98da21bab9c3ce984021a959efa3852",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://778b218b0e19414b80d9f5b93d78249ad9e6b06846ef40a1bec3e3528f6659c3",
+				"dweb:/ipfs/QmNutPC5kg4W8HnzXVpJ2KS5ykqQCi75MAtr4XJpE7ugE8"
+			]
+		},
+		"Strings.sol": {
+			"keccak256": "0x0829b081483a3608ba02133a8a0a962923d615eeee81f241b6060729b116ff34",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://724cf3f3fe534f1b1125481575f4a67995ca7b5208f09d816bad1f8f88ea3982",
+				"dweb:/ipfs/QmRpW8ePw8kXiLAL8NoKpxqxmFmMNLM748LADun5zDAen7"
+			]
+		},
+		"Weird Claiming.sol": {
+			"keccak256": "0xa2c3ef3a6df64c6db64452ac81c57bbf2fb3d03fc05afb5c27f473b30e80288b",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://1aec7000e75232762e7ba7760184c374b1e695aef6d76fa2a6420c57112413a9",
+				"dweb:/ipfs/QmTfnhe6KPWvJgZvKisSqHc7zN7UBKbEEG3AyDzjqzFh2R"
+			]
+		},
+		"WeirdPunks.sol": {
+			"keccak256": "0xfd815d17c0dd4828c4188ead31dd50e07b4d8560c17ee6bcc0f0c57c6d1359fd",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://bc35ee0abaa2561eb848e94c213c879422ef7a23cc9b3991a6a8de39b90125db",
+				"dweb:/ipfs/Qmd7Wigp6qBNNahsnTDttBQ2Y1UamNfifdLjr3HbRBoTm1"
+			]
+		}
+	},
+	"version": 1
+}

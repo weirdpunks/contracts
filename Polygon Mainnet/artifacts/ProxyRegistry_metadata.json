@@ -1,0 +1,153 @@
+{
+	"compiler": {
+		"version": "0.8.7+commit.e28d00a7"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"name": "proxies",
+				"outputs": [
+					{
+						"internalType": "contract OwnableDelegateProxy",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"final polygon/ERC1155Tradable.sol": "ProxyRegistry"
+		},
+		"evmVersion": "london",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"final polygon/Address.sol": {
+			"keccak256": "0x4f82ac554df2b88092b0dff60e01918ddb7b4d34935150ad5a82c03ce83ed225",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://9d452f560e273b2c7c5b83bb29826ee164deb9aac4a0489452368f303227edd7",
+				"dweb:/ipfs/QmTj2yeCDKwy4pa4oNZ1b5NeQf9X6X4cn5k4pL9EqTpJs5"
+			]
+		},
+		"final polygon/Context.sol": {
+			"keccak256": "0x2c36c9489879b7c91cdd73bbe8b2584f401aa26f4f252c04f053e824d6ca75c6",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://3ef20575fc12fd27f252acd28a8d0f65893832f29fd9c82f7ec165121af4572f",
+				"dweb:/ipfs/QmZMCoWWDTjhs1CNFMWv4JNWVyyeuzyqteCHhF4heCUYJJ"
+			]
+		},
+		"final polygon/ContextMixin.sol": {
+			"keccak256": "0x56c4ac7e7ed86b02b7af7beb00d2f2517ea133c9a262af96e2b3f2fc0528c645",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://68f983745370b9d8ddc7ddc9e9752deed55ddaec2b1d6f4f2e7b82e9355150a0",
+				"dweb:/ipfs/QmNsdW1v6b2j6gdCevzNh6esBRGhBDw2YPJCVy62RRpNs5"
+			]
+		},
+		"final polygon/ERC1155.sol": {
+			"keccak256": "0x5a6b640ece6ed63579f6a5e895a2c8d544c9a3dc0020f007bb8e49dc3df17b6c",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://1ea9385679b7513626b80fb75b806f1a1afce041dd5e1e59e5d476390523abe5",
+				"dweb:/ipfs/QmbnqwboS5kQxaJwMJgG7xAoBBfApts293U59YNBkwcNg6"
+			]
+		},
+		"final polygon/ERC1155Tradable.sol": {
+			"keccak256": "0xb59d3e4741a3b7d6813222115241232b83adb50f2581780b06d14e6dc03ea8d7",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://89e77843bc28f3f562ce3a948b16ba1f622c8176113ae9cd69d18a1bc7c466f9",
+				"dweb:/ipfs/QmYj15aWUgqxPZpAFV1oHPM8pFocrSrH7MxUr5bMNnFRtK"
+			]
+		},
+		"final polygon/ERC165.sol": {
+			"keccak256": "0x847fd3fb0bb6946e86e0da7060f08df5961ec874b4f93de2438b835b92edfd08",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://4b85ed4a7ffd8067845fc390c896e4f49f78d4de1be291b76eda465f941e4e0c",
+				"dweb:/ipfs/QmbvCXfbTtEq4C1hpVjHGWCUVC5KdZHTCADWDwLYrYJZ88"
+			]
+		},
+		"final polygon/IERC1155.sol": {
+			"keccak256": "0xdd69e7c1eb73db9a452d43839a84ff5e077b863829925911467475a1f6084431",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://592212e0d251c60d23a3f008e368ff3fd9e9566c6132f32693883308146bc7e7",
+				"dweb:/ipfs/QmVCxuqkd5TsXjttf9RLjPwrVEeYDn6V6g2Y9exhjRmKtL"
+			]
+		},
+		"final polygon/IERC1155MetadataURI.sol": {
+			"keccak256": "0x36908d39ba8e1287b70c7c1b59e9c63196b08521652cb3bd6bddff49dab40a80",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://754807b9c2e6599f98c8b95e759b11c4ad29b6160d7c075bba62484dbbca7671",
+				"dweb:/ipfs/QmWGgEbTd4gE6DtWHSCxm4wpZyAxe3g3QiXXuXuzXGugBi"
+			]
+		},
+		"final polygon/IERC1155Receiver.sol": {
+			"keccak256": "0x22a0c50cbc69aa19cb1d9ee08f73b227e2c5d3a14b9dbb53de819a916ddd3e3e",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://ac979f9a2c42aedb3b66da2cb7d7d579224a2129c54f6515256835839158b7b9",
+				"dweb:/ipfs/QmUxV7xaoM1tjEXgUCSR46x43aN9XtaNSv4ijURpTbSiHv"
+			]
+		},
+		"final polygon/IERC165.sol": {
+			"keccak256": "0x3213cb47aba4f8ba951dc5671d44e3559fecec1e9c402e679fbb5ada255fdff1",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://fc2296c533793e4c2a6eb4909bd2ca8e99044aff82e3fe2049092bd3f62034a3",
+				"dweb:/ipfs/QmVwAULUUqeXLdggzzW1C3hdNUZbqHoCskoGyfzZ5EKcwW"
+			]
+		},
+		"final polygon/Ownable.sol": {
+			"keccak256": "0x5eeb86897007c578f301464fceac720c7330486c54ae85c0c09068b46197cfb9",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://edefd9ff4f087a3016763a687eaae449c0e8f6dcda9d86032a49de900f129050",
+				"dweb:/ipfs/Qmc4adiPdGKgEJLxqgd8JuKkwrNBNtB78kkGinnnuUnyJN"
+			]
+		},
+		"final polygon/Pausable.sol": {
+			"keccak256": "0x4537e3414aa00aef5f09d492f339302326635bc79e5435e62101fb8cf0afbbe0",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://38c691ac261a8298ac4eb0e5128902811cb26867fafc3adec06b9b824a3a08d5",
+				"dweb:/ipfs/QmXrwXWLMs3FbczKPZnWJf1XezesQX94K2VXNchQCTGUuQ"
+			]
+		}
+	},
+	"version": 1
+}
