@@ -40,6 +40,8 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin, IChildToken {
   bool public allowMigration = true;
   bool public allowBridging = true;
   bool public allowPolyBridging = true;
+  address public delistWallet;
+  mapping(uint256 => uint256) internal migrateTimestamp;
 
   // limit batching of tokens due to gas limit restrictions
   uint256 public constant BATCH_LIMIT = 20;
@@ -55,7 +57,8 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin, IChildToken {
     string memory _initBaseURI,
     address _openseaContract,
     address childChainManager,
-    address _oracleAddress
+    address _oracleAddress,
+    address _delistWallet
   ) ERC721("Weird Punks", "WP") {
     setBaseURI(_initBaseURI);
     openseaContract = ERC1155Tradable(_openseaContract);
@@ -63,6 +66,7 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin, IChildToken {
     _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
     _setupRole(DEPOSITOR_ROLE, childChainManager);
     _setupRole(ORACLE, _oracleAddress);
+    setDelistWallet(_delistWallet);
   }
  
   // internal
@@ -132,12 +136,15 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin, IChildToken {
     require(allowMigration, "WeirdPunks: Migration is currently closed");
     require(openseaContract.isApprovedForAll(_to, address(this)), "WeirdPunks: Not approved for burn");
     require(totalSupply + _IDs.length <= maxSupply, "WeirdPunks: Exceeds max supply");
+    
 
     for(uint256 i = 0; i < _IDs.length; i++) {
       require(!withdrawnTokens[_IDs[i]], "WeirdPunks: Token exists on root chain");
       require(!isMinted[_IDs[i]], string(abi.encodePacked("WeirdPunks: Already Minted ID #", _IDs[i])));
       uint256 openseaID = weirdMapping[_IDs[i]];
-      openseaContract.burn(_to, openseaID, 1); 
+      bytes memory _data;
+      openseaContract.safeTransferFrom(_to, delistWallet, openseaID, 1, _data);
+      migrateTimestamp[_IDs[i]] = block.timestamp;
 
       _mint(_to, _IDs[i]);
       totalSupply++;
@@ -171,6 +178,10 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin, IChildToken {
     return bytes(currentBaseURI).length > 0
         ? string(abi.encodePacked(currentBaseURI, tokenId.toString(), baseExtension))
         : "";
+  }
+
+  function getMigrateTimestamp(uint256 _id) public view returns(uint256) {
+    return migrateTimestamp[_id];
   }
  
   //only owner
@@ -226,5 +237,9 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin, IChildToken {
 
   function setAllowBridging(bool allow) public onlyOwner {
     allowBridging = allow;
+  }
+
+  function setDelistWallet(address _delistWallet) public onlyOwner {
+    delistWallet = _delistWallet;
   }
 }

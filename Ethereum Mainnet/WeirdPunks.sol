@@ -35,6 +35,8 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin {
   bool public allowMigration = true;
   bool public allowBridging = true;
   uint256 public constant BATCH_LIMIT = 20;
+  address public delistWallet;
+  mapping(uint256 => uint256) internal migrateTimestamp;
 
   event startBatchBridge(address user, uint256[] IDs);
 
@@ -46,7 +48,8 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin {
     string memory _initBaseURI,
     address _openseaContract,
     address _MintableAssetProxy,
-    address _oracleAddress
+    address _oracleAddress,
+    address _delistWallet
   ) ERC721("Weird Punks", "WP") {
     setBaseURI(_initBaseURI);
     openseaContract = ERC1155Tradable(_openseaContract);
@@ -54,6 +57,7 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin {
     _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
     _setupRole(PREDICATE_ROLE, _MintableAssetProxy);
     _setupRole(ORACLE, _oracleAddress);
+    setDelistWallet(_delistWallet);
   }
  
   // internal
@@ -99,8 +103,9 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin {
     for(uint256 i = 0; i < _IDs.length; i++) {
         require(!isMinted[_IDs[i]], string(abi.encodePacked("WeirdPunks: Already Minted ID #", _IDs[i])));
         uint256 openseaID = weirdMapping[_IDs[i]];
-        openseaContract.burn(_to, openseaID, 1);
-        
+        bytes memory _data;
+        openseaContract.safeTransferFrom(_to, delistWallet, openseaID, 1, _data); 
+        migrateTimestamp[_IDs[i]] = block.timestamp;
 
         _mint(_to, _IDs[i]);
         totalSupply++;
@@ -134,6 +139,10 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin {
     return bytes(currentBaseURI).length > 0
         ? string(abi.encodePacked(currentBaseURI, tokenId.toString(), baseExtension))
         : "";
+  }
+
+  function getMigrateTimestamp(uint256 _id) public view returns(uint256) {
+    return migrateTimestamp[_id];
   }
  
   //only owner
@@ -181,5 +190,9 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin {
 
   function setAllowBridging(bool allow) public onlyOwner {
     allowBridging = allow;
+  }
+
+  function setDelistWallet(address _delistWallet) public onlyOwner {
+    delistWallet = _delistWallet;
   }
 }

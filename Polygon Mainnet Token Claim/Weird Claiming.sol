@@ -29,13 +29,13 @@ contract WeirdClaiming is Ownable, AccessControl {
     mapping(uint256 => uint256) public lastClaimed;
     uint256 public tokensPerSecond;
     event checkEthTokens(address user);
-    uint256 public genesisTimestamp;
+    // uint256 public genesisTimestamp;
     
-    constructor(address _oracleAddress, uint256 _tokensPerSecond, uint256 _genesisTimestamp) {
+    constructor(address _oracleAddress, uint256 _tokensPerSecond) {
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(ORACLE, _oracleAddress);
         setTokensPerSecond(_tokensPerSecond);
-        genesisTimestamp = _genesisTimestamp;
+        // genesisTimestamp = _genesisTimestamp;
     }
 
     function claim() public {
@@ -75,7 +75,8 @@ contract WeirdClaiming is Ownable, AccessControl {
     }
 
     function lastClaim(uint256 id) public view returns (uint256) {
-        return Math.max(lastClaimed[id], genesisTimestamp);
+        uint256 mintedTimestamp = WeirdPunksContract.getMigrateTimestamp(id);
+        return Math.max(lastClaimed[id], mintedTimestamp);
     }
 
     function setTokensPerSecond(uint256 _tokensPerSecond) public onlyOwner {

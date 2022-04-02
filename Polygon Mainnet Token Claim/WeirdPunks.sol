@@ -6,6 +6,7 @@ import "./ERC721.sol";
 contract WeirdPunks is ERC721 {
  
   uint256 public maxSupply = 1000;
+  mapping(uint256 => uint256) internal migrateTimestamp;
 
   constructor(
   ) ERC721("Weird Punks", "WP") {}
@@ -27,5 +28,9 @@ contract WeirdPunks is ERC721 {
       }
     }
     return ownedTokenIds;
+  }
+
+  function getMigrateTimestamp(uint256 _id) public view returns(uint256) {
+    return migrateTimestamp[_id];
   }
 }
