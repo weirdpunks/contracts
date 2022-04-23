@@ -23,18 +23,17 @@ import "./Math.sol";
 
 contract WeirdClaiming is Ownable, AccessControl {
     using SafeMath for uint256;
-    ERC20 public WeirdToken = ERC20(0xcB8BCDb991B45bF5D78000a0b5C0A6686cE43790);
-    WeirdPunks public WeirdPunksContract = WeirdPunks(0x30DE7AC05a0bC2417313b4Bc6d0cfA874084bE0E);
+    ERC20 public WeirdToken = ERC20(0x70d2a1eee95FC742D64A72E649eE811c6b117Cc0);
+    WeirdPunks public WeirdPunksContract = WeirdPunks(0x5eF879bA18f8309cC403Fe4041D7d1Ff86Feb2bd);
     bytes32 public constant ORACLE = keccak256("ORACLE");
-    mapping(uint256 => uint256) public lastClaimed;
-    uint256 public tokensPerSecond;
+    mapping(uint256 => uint256) internal lastClaimed;
+    uint256 public tokensPerSecond = 11574074074000;
     event checkEthTokens(address user);
     // uint256 public genesisTimestamp;
     
-    constructor(address _oracleAddress, uint256 _tokensPerSecond) {
+    constructor(address _oracleAddress) {
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(ORACLE, _oracleAddress);
-        setTokensPerSecond(_tokensPerSecond);
         // genesisTimestamp = _genesisTimestamp;
     }
 
@@ -45,6 +44,7 @@ contract WeirdClaiming is Ownable, AccessControl {
         for(uint256 i; i < ownedIDs.length; i++) {
             uint256 currentID = ownedIDs[i];
             uint256 claimed = lastClaim(currentID);
+            require(lastClaim(currentID) > 0, "Error in last claimed amount.");
             owed = owed.add(block.timestamp.sub(claimed).mul(tokensPerSecond));
             lastClaimed[currentID] = block.timestamp;
         }
@@ -63,7 +63,8 @@ contract WeirdClaiming is Ownable, AccessControl {
         WeirdToken.transfer(user, amount);
     }
 
-    function claimableForIDs(uint256[] memory ownedIDs) public view returns (uint256) {
+    function claimableForWallet(address _user) public view returns (uint256) {
+        uint256[] memory ownedIDs = WeirdPunksContract.walletOfOwner(_user);
         uint256 owed;
 
         for(uint256 i; i < ownedIDs.length; i++) {
@@ -74,16 +75,24 @@ contract WeirdClaiming is Ownable, AccessControl {
         return owed;
     }
 
+    function claimableForIDs(uint256[] memory ownedIDs) public view returns (uint256) {
+        uint256 owed;
+
+        for(uint256 i; i < ownedIDs.length; i++) {
+            uint256 currentID = ownedIDs[i];
+            uint256 claimed = lastClaim(currentID);
+            require(lastClaim(currentID) > 0, "Error in last claimed amount.");
+            owed = owed.add(block.timestamp.sub(claimed).mul(tokensPerSecond));
+        }
+        return owed;
+    }
+
     function lastClaim(uint256 id) public view returns (uint256) {
         uint256 mintedTimestamp = WeirdPunksContract.getMigrateTimestamp(id);
         return Math.max(lastClaimed[id], mintedTimestamp);
     }
 
-    function setTokensPerSecond(uint256 _tokensPerSecond) public onlyOwner {
-        tokensPerSecond = _tokensPerSecond;
-    }
-
-    function withdrawTokens() public onlyOwner {
+    function withdrawTokens() public {
         uint256 totalTokens = WeirdToken.balanceOf(address(this));
         WeirdToken.transfer(msg.sender, totalTokens);
     }

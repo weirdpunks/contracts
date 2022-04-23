@@ -38,7 +38,7 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin {
   address public delistWallet;
   mapping(uint256 => uint256) internal migrateTimestamp;
 
-  event startBatchBridge(address user, uint256[] IDs);
+  event startBatchBridge(address user, uint256[] IDs, uint256[] bridgeMigrateTimestamps);
 
   function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, AccessControl) returns (bool) {
     return super.supportsInterface(interfaceId);
@@ -86,12 +86,14 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin {
   function batchBridge(uint256[] memory IDs) public {
     require(allowBridging);
     require(IDs.length <= BATCH_LIMIT, "WeirdPunks: Exceeds limit");
+    uint256[] memory bridgeMigrateTimestamps;
     for (uint256 i; i < IDs.length; i++) {
       require(msg.sender == ownerOf(IDs[i]), string(abi.encodePacked("WeirdPunks: Invalid owner of ", IDs[i])));
       _burn(IDs[i]);
       totalSupply--;
+      bridgeMigrateTimestamps[i] = getMigrateTimestamp(IDs[i]);
     }
-    emit startBatchBridge(msg.sender, IDs);
+    emit startBatchBridge(msg.sender, IDs, bridgeMigrateTimestamps);
   }
 
 
@@ -111,25 +113,6 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin {
         totalSupply++;
         isMinted[_IDs[i]] = true;
     }
-  } 
- 
-  function walletOfOwner(address _owner) public view returns (uint256[] memory) {
-    uint256 ownerTokenCount = balanceOf(_owner);
-    uint256[] memory ownedTokenIds = new uint256[](ownerTokenCount);
-    uint256 currentTokenId = 1;
-    uint256 ownedTokenIndex = 0;
-
-    while (ownedTokenIndex < ownerTokenCount && currentTokenId <= maxSupply) {
-      if(_exists(currentTokenId)) {
-        address currentTokenOwner = ownerOf(currentTokenId);
-        if (currentTokenOwner == _owner) {
-          ownedTokenIds[ownedTokenIndex] = currentTokenId;
-          ownedTokenIndex++;
-        }
-        currentTokenId++;
-      }
-    }
-    return ownedTokenIds;
   }
  
   function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {

@@ -14,14 +14,15 @@
 pragma solidity ^0.8.0;
 
 import "./Ownable.sol";
-import "./ERC721.sol";
+import "./ERC721Enumerable.sol";
 import "./Strings.sol";
 import "./ERC20.sol";
 import "./ERC1155Tradable.sol";
 import "./AccessControlMixin.sol";
 import "./IChildToken.sol";
+import "./Math.sol";
 
-contract WeirdPunks is ERC721, Ownable, AccessControlMixin, IChildToken {
+contract WeirdPunks is ERC721Enumerable, Ownable, AccessControlMixin, IChildToken {
   using Strings for uint256;
  
   string public baseURI;
@@ -30,13 +31,14 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin, IChildToken {
   mapping(uint256 => bool) internal isMinted;
   ERC1155Tradable public openseaContract;
   uint256 public maxSupply = 1000;
-  uint256 public totalSupply = 0;
   bytes32 public constant DEPOSITOR_ROLE = keccak256("DEPOSITOR_ROLE");
   bytes32 public constant ORACLE = keccak256("ORACLE");
   mapping (uint256 => bool) public withdrawnTokens;
   address public oracleAddress;
-  ERC20 public WETH = ERC20(0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619);
+  ERC20 public WETH = ERC20(0xEB1385575867578Fc618ca04C94AFE1DEdfe3298);
+  ERC20 public WeirdToken = ERC20(0x70d2a1eee95FC742D64A72E649eE811c6b117Cc0);
   uint256 public gasETH;
+  uint256 public WEIRD_BRIDGE_FEE = 1;
   bool public allowMigration = true;
   bool public allowBridging = true;
   bool public allowPolyBridging = true;
@@ -49,7 +51,7 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin, IChildToken {
   event WithdrawnBatch(address indexed user, uint256[] tokenIds);
   event startBatchBridge(address user, uint256[] IDs);
 
-  function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, AccessControl) returns (bool) {
+  function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721Enumerable, AccessControl) returns (bool) {
     return super.supportsInterface(interfaceId);
   }
 
@@ -80,7 +82,6 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin, IChildToken {
       uint256 tokenId = abi.decode(depositData, (uint256));
       withdrawnTokens[tokenId] = false;
       _mint(user, tokenId);
-      totalSupply++;
 
     } else {
       uint256[] memory tokenIds = abi.decode(depositData, (uint256[]));
@@ -88,7 +89,6 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin, IChildToken {
       for (uint256 i; i < length; i++) {
         withdrawnTokens[tokenIds[i]] = false;
         _mint(user, tokenIds[i]);
-        totalSupply++;
       }
     }
   }
@@ -104,38 +104,44 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin, IChildToken {
       require(_msgSender() == ownerOf(tokenId), string(abi.encodePacked("WeirdPunks: Invalid owner of ", tokenId)));
       withdrawnTokens[tokenId] = true;
       _burn(tokenId);
-      totalSupply--;
   }
     emit WithdrawnBatch(_msgSender(), tokenIds);
   }
 
-  function depositBridge(address user, uint256[] memory IDs) public only(ORACLE) {
+  function depositBridge(address user, uint256[] memory IDs, uint256[] memory bridgeMigrateTimestamps) public only(ORACLE) {
     for (uint256 i; i < IDs.length; i++) {
+      uint256 newTimestamp = Math.max(bridgeMigrateTimestamps[i], migrateTimestamp[IDs[i]]);
+      migrateTimestamp[IDs[i]] = newTimestamp;
       _mint(user, IDs[i]);
-      totalSupply++;
     }
   }
 
   // public
   function batchBridge(uint256[] memory IDs, uint256 gas) public {
     require(allowBridging);
+
     uint256 payableGas = gasETH + (IDs.length - 1) * (gasETH / 2);
     require(WETH.allowance(msg.sender, address(this)) >= payableGas, "WeirdPunks: Not enough polygon eth");
     require(gas >= payableGas, "WeirdPunks: Not enough gas");
     WETH.transferFrom(msg.sender, oracleAddress, gas);
+
+    uint256 payableWeird = WEIRD_BRIDGE_FEE * IDs.length;
+    require(WeirdToken.allowance(msg.sender, address(this)) >= payableWeird, "WeirdPunks: Not enough Weird tokens allowed");
+    WeirdToken.transferFrom(msg.sender, oracleAddress, payableWeird);
+
     require(IDs.length <= BATCH_LIMIT, "WeirdPunks: Exceeds limit");
     for (uint256 i; i < IDs.length; i++) {
       require(msg.sender == ownerOf(IDs[i]), string(abi.encodePacked("WeirdPunks: Invalid owner of ", IDs[i])));
       _burn(IDs[i]);
-      totalSupply--;
     }
     emit startBatchBridge(msg.sender, IDs);
   }
 
   function burnAndMint(address _to, uint256[] memory _IDs) public {
+    uint256 supply = totalSupply();
     require(allowMigration, "WeirdPunks: Migration is currently closed");
     require(openseaContract.isApprovedForAll(_to, address(this)), "WeirdPunks: Not approved for burn");
-    require(totalSupply + _IDs.length <= maxSupply, "WeirdPunks: Exceeds max supply");
+    require(supply + _IDs.length <= maxSupply, "WeirdPunks: Exceeds max supply");
     
 
     for(uint256 i = 0; i < _IDs.length; i++) {
@@ -147,29 +153,9 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin, IChildToken {
       migrateTimestamp[_IDs[i]] = block.timestamp;
 
       _mint(_to, _IDs[i]);
-      totalSupply++;
       isMinted[_IDs[i]] = true;
     }
   } 
- 
-  function walletOfOwner(address _owner) public view returns (uint256[] memory) {
-    uint256 ownerTokenCount = balanceOf(_owner);
-    uint256[] memory ownedTokenIds = new uint256[](ownerTokenCount);
-    uint256 currentTokenId = 1;
-    uint256 ownedTokenIndex = 0;
-
-    while (ownedTokenIndex < ownerTokenCount && currentTokenId <= maxSupply) {
-      if(_exists(currentTokenId)) {
-        address currentTokenOwner = ownerOf(currentTokenId);
-        if (currentTokenOwner == _owner) {
-          ownedTokenIds[ownedTokenIndex] = currentTokenId;
-          ownedTokenIndex++;
-        }
-        currentTokenId++;
-      }
-    }
-    return ownedTokenIds;
-  }
  
   function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
     require(_exists(tokenId), "WeirdPunks: URI query for nonexistent token");
@@ -180,19 +166,28 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin, IChildToken {
         : "";
   }
 
+  function walletOfOwner(address _owner) public view returns (uint256[] memory) {
+    uint256 ownerTokenCount = balanceOf(_owner);
+    uint256[] memory tokenIds = new uint256[](ownerTokenCount);
+    for (uint256 i; i < ownerTokenCount; i++) {
+      tokenIds[i] = tokenOfOwnerByIndex(_owner, i);
+    }
+    return tokenIds;
+  }
+
   function getMigrateTimestamp(uint256 _id) public view returns(uint256) {
     return migrateTimestamp[_id];
   }
  
   //only owner
   function overrideMint(address[] memory _to, uint256[] memory _IDs) public onlyOwner {
+    uint256 supply = totalSupply();
     require(!allowMigration, "WeirdPunks: Migration is currently open");
-    require(totalSupply + _IDs.length <= maxSupply, "WeirdPunks: Exceeds max supply");
+    require(supply + _IDs.length <= maxSupply, "WeirdPunks: Exceeds max supply");
     for(uint256 i = 0; i < _IDs.length; i++) {
         require(!isMinted[_IDs[i]], string(abi.encodePacked("WeirdPunks: Already Minted ID #", _IDs[i])));
         
         _mint(_to[i], _IDs[i]);
-        totalSupply++;
         isMinted[_IDs[i]] = true;
     }
   }
@@ -241,5 +236,13 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin, IChildToken {
 
   function setDelistWallet(address _delistWallet) public onlyOwner {
     delistWallet = _delistWallet;
+  }
+
+  function setTimestamp(uint256 id, uint256 timestamp) public onlyOwner {
+    migrateTimestamp[id] = timestamp;
+  }
+
+  function setWeirdBridgeFee(uint256 _newFee) public onlyOwner {
+    WEIRD_BRIDGE_FEE = _newFee;
   }
 }
