@@ -92,7 +92,7 @@ contract WeirdClaiming is Ownable, AccessControl {
         return Math.max(lastClaimed[id], mintedTimestamp);
     }
 
-    function withdrawTokens() public {
+    function withdrawTokens() public onlyOwner {
         uint256 totalTokens = WeirdToken.balanceOf(address(this));
         WeirdToken.transfer(msg.sender, totalTokens);
     }
