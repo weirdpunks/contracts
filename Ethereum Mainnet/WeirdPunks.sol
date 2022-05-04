@@ -53,7 +53,6 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin {
   ) ERC721("Weird Punks", "WP") {
     setBaseURI(_initBaseURI);
     openseaContract = ERC1155Tradable(_openseaContract);
-    setOracleAddress(_oracleAddress);
     _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
     _setupRole(PREDICATE_ROLE, _MintableAssetProxy);
     _setupRole(ORACLE, _oracleAddress);
@@ -86,7 +85,7 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin {
   function batchBridge(uint256[] memory IDs) public {
     require(allowBridging);
     require(IDs.length <= BATCH_LIMIT, "WeirdPunks: Exceeds limit");
-    uint256[] memory bridgeMigrateTimestamps;
+    uint256[] memory bridgeMigrateTimestamps = new uint256[](IDs.length);
     for (uint256 i; i < IDs.length; i++) {
       require(msg.sender == ownerOf(IDs[i]), string(abi.encodePacked("WeirdPunks: Invalid owner of ", IDs[i])));
       _burn(IDs[i]);
@@ -127,6 +126,14 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin {
   function getMigrateTimestamp(uint256 _id) public view returns(uint256) {
     return migrateTimestamp[_id];
   }
+
+  function getMigrateTimestamps(uint256[] memory _ids) public view returns(uint256[] memory) {
+    uint256[] memory timestamps = new uint256[](_ids.length);
+    for(uint256 i = 0; i < _ids.length; i++) {
+      timestamps[i] = migrateTimestamp[_ids[i]];
+    }
+    return timestamps;
+  }
  
   //only owner
   function overrideMint(address _to, uint256[] memory _IDs) public onlyOwner {
@@ -163,10 +170,6 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin {
     openseaContract = ERC1155Tradable(_openseaContract);
   }
 
-  function setOracleAddress(address _oracleAddress) public onlyOwner {
-    oracleAddress = _oracleAddress;
-  }
-
   function setAllowMigration(bool allow) public onlyOwner {
     allowMigration = allow;
   }
@@ -177,5 +180,11 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin {
 
   function setDelistWallet(address _delistWallet) public onlyOwner {
     delistWallet = _delistWallet;
+  }
+
+  function setOracleAddress(address newOracleAddress) public onlyOwner {
+    _revokeRole(ORACLE, oracleAddress);
+    _grantRole(ORACLE, newOracleAddress);
+    oracleAddress = newOracleAddress;
   }
 }

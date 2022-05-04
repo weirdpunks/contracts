@@ -44,6 +44,7 @@ contract WeirdPunks is ERC721Enumerable, Ownable, AccessControlMixin, IChildToke
   bool public allowPolyBridging = true;
   address public delistWallet;
   mapping(uint256 => uint256) internal migrateTimestamp;
+  uint256 gasMultiplier;
 
   // limit batching of tokens due to gas limit restrictions
   uint256 public constant BATCH_LIMIT = 20;
@@ -60,15 +61,16 @@ contract WeirdPunks is ERC721Enumerable, Ownable, AccessControlMixin, IChildToke
     address _openseaContract,
     address childChainManager,
     address _oracleAddress,
-    address _delistWallet
+    address _delistWallet,
+    uint256 _gasMultiplier
   ) ERC721("Weird Punks", "WP") {
     setBaseURI(_initBaseURI);
     openseaContract = ERC1155Tradable(_openseaContract);
-    setOracleAddress(_oracleAddress);
     _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
     _setupRole(DEPOSITOR_ROLE, childChainManager);
     _setupRole(ORACLE, _oracleAddress);
     setDelistWallet(_delistWallet);
+    setGasMultiplier(_gasMultiplier);
   }
  
   // internal
@@ -89,6 +91,9 @@ contract WeirdPunks is ERC721Enumerable, Ownable, AccessControlMixin, IChildToke
       for (uint256 i; i < length; i++) {
         withdrawnTokens[tokenIds[i]] = false;
         _mint(user, tokenIds[i]);
+        if(migrateTimestamp[tokenIds[i]] < 1) {
+          migrateTimestamp[tokenIds[i]] = block.timestamp;
+        }
       }
     }
   }
@@ -110,8 +115,9 @@ contract WeirdPunks is ERC721Enumerable, Ownable, AccessControlMixin, IChildToke
 
   function depositBridge(address user, uint256[] memory IDs, uint256[] memory bridgeMigrateTimestamps) public only(ORACLE) {
     for (uint256 i; i < IDs.length; i++) {
-      uint256 newTimestamp = Math.max(bridgeMigrateTimestamps[i], migrateTimestamp[IDs[i]]);
-      migrateTimestamp[IDs[i]] = newTimestamp;
+      if(migrateTimestamp[IDs[i]] < 1) {
+        migrateTimestamp[IDs[i]] = bridgeMigrateTimestamps[i];
+      }
       _mint(user, IDs[i]);
     }
   }
@@ -120,14 +126,14 @@ contract WeirdPunks is ERC721Enumerable, Ownable, AccessControlMixin, IChildToke
   function batchBridge(uint256[] memory IDs, uint256 gas) public {
     require(allowBridging);
 
-    uint256 payableGas = gasETH + (IDs.length - 1) * (gasETH / 2);
+    uint256 payableGas = gasETH + (IDs.length - 1) * (gasETH / gasMultiplier * 10);
     require(WETH.allowance(msg.sender, address(this)) >= payableGas, "WeirdPunks: Not enough polygon eth");
     require(gas >= payableGas, "WeirdPunks: Not enough gas");
     WETH.transferFrom(msg.sender, oracleAddress, gas);
 
     uint256 payableWeird = WEIRD_BRIDGE_FEE * IDs.length;
     require(WeirdToken.allowance(msg.sender, address(this)) >= payableWeird, "WeirdPunks: Not enough Weird tokens allowed");
-    WeirdToken.transferFrom(msg.sender, oracleAddress, payableWeird);
+    WeirdToken.transferFrom(msg.sender, 0x000000000000000000000000000000000000dEaD, payableWeird);
 
     require(IDs.length <= BATCH_LIMIT, "WeirdPunks: Exceeds limit");
     for (uint256 i; i < IDs.length; i++) {
@@ -218,10 +224,6 @@ contract WeirdPunks is ERC721Enumerable, Ownable, AccessControlMixin, IChildToke
     openseaContract = ERC1155Tradable(_openseaContract);
   }
 
-  function setOracleAddress(address _oracleAddress) public onlyOwner {
-    oracleAddress = _oracleAddress;
-  }
-
   function setAllowMigration(bool allow) public onlyOwner {
     allowMigration = allow;
   }
@@ -244,5 +246,15 @@ contract WeirdPunks is ERC721Enumerable, Ownable, AccessControlMixin, IChildToke
 
   function setWeirdBridgeFee(uint256 _newFee) public onlyOwner {
     WEIRD_BRIDGE_FEE = _newFee;
+  }
+
+  function setOracleAddress(address newOracleAddress) public onlyOwner {
+    _revokeRole(ORACLE, oracleAddress);
+    _grantRole(ORACLE, newOracleAddress);
+    oracleAddress = newOracleAddress;
+  }
+
+  function setGasMultiplier(uint256 newMultiplier) public onlyOwner {
+    gasMultiplier = newMultiplier;
   }
 }
