@@ -21,6 +21,7 @@ import "./ERC1155Tradable.sol";
 import "./AccessControlMixin.sol";
 import "./IChildToken.sol";
 import "./Math.sol";
+import "./gasCalculator.sol";
 
 contract WeirdPunks is ERC721Enumerable, Ownable, AccessControlMixin, IChildToken {
   using Strings for uint256;
@@ -37,14 +38,15 @@ contract WeirdPunks is ERC721Enumerable, Ownable, AccessControlMixin, IChildToke
   address public oracleAddress;
   ERC20 public WETH = ERC20(0xEB1385575867578Fc618ca04C94AFE1DEdfe3298);
   ERC20 public WeirdToken = ERC20(0x70d2a1eee95FC742D64A72E649eE811c6b117Cc0);
-  uint256 public gasETH;
+  gasCalculator public gasETHContract;
+  uint256 public gasETH = gasETHContract.gasETH();
+  uint256 internal gasMultiplier = gasETHContract.gasMultiplier();
   uint256 public WEIRD_BRIDGE_FEE = 1;
   bool public allowMigration = true;
   bool public allowBridging = true;
   bool public allowPolyBridging = true;
   address public delistWallet;
   mapping(uint256 => uint256) internal migrateTimestamp;
-  uint256 gasMultiplier;
 
   // limit batching of tokens due to gas limit restrictions
   uint256 public constant BATCH_LIMIT = 20;
@@ -62,7 +64,7 @@ contract WeirdPunks is ERC721Enumerable, Ownable, AccessControlMixin, IChildToke
     address childChainManager,
     address _oracleAddress,
     address _delistWallet,
-    uint256 _gasMultiplier
+    address _gasCalculator
   ) ERC721("Weird Punks", "WP") {
     setBaseURI(_initBaseURI);
     openseaContract = ERC1155Tradable(_openseaContract);
@@ -70,7 +72,7 @@ contract WeirdPunks is ERC721Enumerable, Ownable, AccessControlMixin, IChildToke
     _setupRole(DEPOSITOR_ROLE, childChainManager);
     _setupRole(ORACLE, _oracleAddress);
     setDelistWallet(_delistWallet);
-    setGasMultiplier(_gasMultiplier);
+    gasETHContract = gasCalculator(_gasCalculator);
   }
  
   // internal
@@ -211,10 +213,6 @@ contract WeirdPunks is ERC721Enumerable, Ownable, AccessControlMixin, IChildToke
       }
     }    
   }
-
-  function setGasEth(uint256 _gas) public only(ORACLE) {
-    gasETH = _gas;
-  }
  
   function setBaseURI(string memory _newBaseURI) public onlyOwner {
     baseURI = _newBaseURI;
@@ -252,9 +250,5 @@ contract WeirdPunks is ERC721Enumerable, Ownable, AccessControlMixin, IChildToke
     _revokeRole(ORACLE, oracleAddress);
     _grantRole(ORACLE, newOracleAddress);
     oracleAddress = newOracleAddress;
-  }
-
-  function setGasMultiplier(uint256 newMultiplier) public onlyOwner {
-    gasMultiplier = newMultiplier;
   }
 }
