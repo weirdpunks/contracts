@@ -25,15 +25,14 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin {
   string public baseURI;
   string public baseExtension = '.json';
   mapping(uint256 => uint256) public weirdMapping;
-  mapping(uint256 => bool) internal isMinted;
   ERC1155Tradable public openseaContract;
   uint256 public maxSupply = 1000;
   uint256 public totalSupply = 0;
   bytes32 public constant PREDICATE_ROLE = keccak256("PREDICATE_ROLE");
   bytes32 public constant ORACLE = keccak256("ORACLE");
   address public oracleAddress;
-  bool public allowMigration = true;
-  bool public allowBridging = true;
+  bool public allowMigration = false;
+  bool public allowBridging = false;
   uint256 public constant BATCH_LIMIT = 20;
   address public delistWallet;
   mapping(uint256 => uint256) internal migrateTimestamp;
@@ -71,7 +70,7 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin {
   }
 
   function exists(uint256 tokenId) external view returns (bool) {
-        return _exists(tokenId);
+    return _exists(tokenId);
   }
 
   function depositBridge(address user, uint256[] memory IDs) public only(ORACLE) {
@@ -102,7 +101,7 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin {
     require(totalSupply + _IDs.length <= maxSupply, "WeirdPunks: Exceeds max supply");
 
     for(uint256 i = 0; i < _IDs.length; i++) {
-        require(!isMinted[_IDs[i]], string(abi.encodePacked("WeirdPunks: Already Minted ID #", _IDs[i])));
+        require(!_exists(_IDs[i]), string(abi.encodePacked("WeirdPunks: Already Minted ID #", _IDs[i])));
         uint256 openseaID = weirdMapping[_IDs[i]];
         bytes memory _data;
         openseaContract.safeTransferFrom(_to, delistWallet, openseaID, 1, _data); 
@@ -110,7 +109,6 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin {
 
         _mint(_to, _IDs[i]);
         totalSupply++;
-        isMinted[_IDs[i]] = true;
     }
   }
  
@@ -140,11 +138,14 @@ contract WeirdPunks is ERC721, Ownable, AccessControlMixin {
     require(!allowMigration, "WeirdPunks: Migration is currently open");
     require(totalSupply + _IDs.length <= maxSupply, "WeirdPunks: Exceeds max supply");
     for(uint256 i = 0; i < _IDs.length; i++) {
-        require(!isMinted[_IDs[i]], string(abi.encodePacked("WeirdPunks: Already Minted ID #", _IDs[i])));
+        require(!_exists(_IDs[i]), string(abi.encodePacked("WeirdPunks: Already Minted ID #", _IDs[i])));
         
         _mint(_to, _IDs[i]);
         totalSupply++;
-        isMinted[_IDs[i]] = true;
+
+        if(migrateTimestamp[_IDs[i]] < 1) {
+          migrateTimestamp[_IDs[i]] = block.timestamp;
+        }
     }
   }
 

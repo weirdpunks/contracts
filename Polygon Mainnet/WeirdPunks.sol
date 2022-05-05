@@ -39,8 +39,8 @@ contract WeirdPunks is ERC721Enumerable, Ownable, AccessControlMixin, IChildToke
   ERC20 public WETH = ERC20(0xEB1385575867578Fc618ca04C94AFE1DEdfe3298);
   ERC20 public WeirdToken = ERC20(0x70d2a1eee95FC742D64A72E649eE811c6b117Cc0);
   gasCalculator public gasETHContract;
-  uint256 public gasETH = gasETHContract.gasETH();
-  uint256 internal gasMultiplier = gasETHContract.gasMultiplier();
+  // uint256 public gasETH = gasETHContract.gasETH();
+  // uint256 internal gasMultiplier = gasETHContract.gasMultiplier();
   uint256 public WEIRD_BRIDGE_FEE = 1;
   bool public allowMigration = true;
   bool public allowBridging = true;
@@ -86,6 +86,9 @@ contract WeirdPunks is ERC721Enumerable, Ownable, AccessControlMixin, IChildToke
       uint256 tokenId = abi.decode(depositData, (uint256));
       withdrawnTokens[tokenId] = false;
       _mint(user, tokenId);
+      if(migrateTimestamp[tokenIds[i]] < 1) {
+        migrateTimestamp[tokenIds[i]] = block.timestamp;
+      }
 
     } else {
       uint256[] memory tokenIds = abi.decode(depositData, (uint256[]));
@@ -128,7 +131,7 @@ contract WeirdPunks is ERC721Enumerable, Ownable, AccessControlMixin, IChildToke
   function batchBridge(uint256[] memory IDs, uint256 gas) public {
     require(allowBridging);
 
-    uint256 payableGas = gasETH + (IDs.length - 1) * (gasETH / gasMultiplier * 10);
+    uint256 payableGas = gasETHContract.gasETH() + (IDs.length - 1) * (gasETHContract.gasETH() / gasETHContract.gasMultiplier() * 10);
     require(WETH.allowance(msg.sender, address(this)) >= payableGas, "WeirdPunks: Not enough polygon eth");
     require(gas >= payableGas, "WeirdPunks: Not enough gas");
     WETH.transferFrom(msg.sender, oracleAddress, gas);
