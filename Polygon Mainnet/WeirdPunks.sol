@@ -36,11 +36,9 @@ contract WeirdPunks is ERC721Enumerable, Ownable, AccessControlMixin, IChildToke
   bytes32 public constant ORACLE = keccak256("ORACLE");
   mapping (uint256 => bool) public withdrawnTokens;
   address public oracleAddress;
-  ERC20 public WETH = ERC20(0xEB1385575867578Fc618ca04C94AFE1DEdfe3298);
-  ERC20 public WeirdToken = ERC20(0x70d2a1eee95FC742D64A72E649eE811c6b117Cc0);
+  ERC20 public WETH = ERC20(0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619);
+  ERC20 public WeirdToken = ERC20(0xcB8BCDb991B45bF5D78000a0b5C0A6686cE43790);
   gasCalculator public gasETHContract;
-  // uint256 public gasETH = gasETHContract.gasETH();
-  // uint256 internal gasMultiplier = gasETHContract.gasMultiplier();
   uint256 public WEIRD_BRIDGE_FEE = 1;
   bool public allowMigration = true;
   bool public allowBridging = true;
@@ -86,8 +84,8 @@ contract WeirdPunks is ERC721Enumerable, Ownable, AccessControlMixin, IChildToke
       uint256 tokenId = abi.decode(depositData, (uint256));
       withdrawnTokens[tokenId] = false;
       _mint(user, tokenId);
-      if(migrateTimestamp[tokenIds[i]] < 1) {
-        migrateTimestamp[tokenIds[i]] = block.timestamp;
+      if(migrateTimestamp[tokenId] < 1) {
+        migrateTimestamp[tokenId] = block.timestamp;
       }
 
     } else {
@@ -200,6 +198,10 @@ contract WeirdPunks is ERC721Enumerable, Ownable, AccessControlMixin, IChildToke
         
         _mint(_to[i], _IDs[i]);
         isMinted[_IDs[i]] = true;
+
+        if(migrateTimestamp[_IDs[i]] < 1) {
+          migrateTimestamp[_IDs[i]] = block.timestamp;
+        }
     }
   }
 

@@ -23,13 +23,13 @@ import "./Math.sol";
 
 contract WeirdClaiming is Ownable, AccessControl {
     using SafeMath for uint256;
-    ERC20 public WeirdToken = ERC20(0x70d2a1eee95FC742D64A72E649eE811c6b117Cc0);
-    WeirdPunks public WeirdPunksContract = WeirdPunks(0x5eF879bA18f8309cC403Fe4041D7d1Ff86Feb2bd);
+    ERC20 public WeirdToken = ERC20(0xcB8BCDb991B45bF5D78000a0b5C0A6686cE43790);
+    WeirdPunks public WeirdPunksContract = WeirdPunks(0x34570e0Cb7EA8e1609B3B703D7Df7026d83a1Fdf);
     bytes32 public constant ORACLE = keccak256("ORACLE");
     mapping(uint256 => uint256) internal lastClaimed;
     uint256 public tokensPerSecond = 11574074074000;
     event checkEthTokens(address user);
-    address oracleAddress;
+    address public oracleAddress;
     
     constructor(address _oracleAddress) {
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -94,7 +94,6 @@ contract WeirdClaiming is Ownable, AccessControl {
         for(uint256 i; i < ownedIDs.length; i++) {
             uint256 currentID = ownedIDs[i];
             uint256 claimed = Math.max(lastClaim(currentID), timestamps[i]);
-            // require(lastClaim(currentID) > 0, "Error in last claimed amount.");
             owed = owed.add(block.timestamp.sub(claimed).mul(tokensPerSecond));
         }
         return owed;
